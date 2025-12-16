@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>RAR Registration Key Generator | rarreg.key</title>
+
+  <meta name="description"
+        content="Generate a RAR registration key file (rarreg.key). Includes official WinRAR download links for commercial, retail, and home versions." />
+
+  <meta name="robots" content="index, follow" />
+
+  <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="keygen.js"></script>
+</head>
+
+<body>
+
+<main class="container">
+
+  <header class="header">
+    <h1>RAR Registration Key Generator</h1>
+    <p class="subtitle">
+      Create a <code>rarreg.key</code> file and access official WinRAR downloads
+    </p>
+  </header>
+
+  <section class="card">
+    <h2>Generate Key File</h2>
+
+    <div class="form-grid">
+      <label>
+        Username
+        <input id="username" value="Microsoft Corporation" maxlength="50" />
+      </label>
+
+      <label>
+        License Type
+        <input id="licenseType" value="Unlimited Perpetual License" maxlength="50" />
+      </label>
+    </div>
+
+    <button id="genBtn" class="primary-btn">Generate Key</button>
+
+    <textarea id="output" readonly rows="12"
+              placeholder="Generated rarreg.key content will appear here..."></textarea>
+
+    <button id="saveBtn" class="secondary-btn" hidden>Download rarreg.key</button>
+  </section>
+
+  <section class="info">
+    <h2>How to Use</h2>
+    <p>
+      To register WinRAR, copy the generated <code>rarreg.key</code> file into:
+    </p>
+    <ul>
+      <li><code>C:\Program Files\WinRAR</code></li>
+      <li>or <code>%APPDATA%\WinRAR</code></li>
+    </ul>
+    <p>
+      You may also drag and drop the key file directly into the WinRAR window.
+    </p>
+  </section>
+
+  <section class="downloads card">
+    <h2>Official WinRAR Downloads</h2>
+
+    <h3>Commercial Edition</h3>
+    <ul id="wrrUl"></ul>
+
+    <h3>Retail Edition</h3>
+    <ul id="rrlbUl"></ul>
+
+    <h3>Home Edition (Ad-Supported)</h3>
+    <ul id="homeUl"></ul>
+  </section>
+
+  <section class="info">
+    <h2>Version Information</h2>
+    <p>
+      <strong>rrlb</strong> refers to builds from
+      <em>RARLAB</em> (www.rarlab.com).
+    </p>
+    <p>
+      <strong>wrr</strong> refers to builds from
+      <em>Win-RAR GmbH</em> (www.win-rar.com), the official distributor.
+    </p>
+    <p>
+      The only difference is the digital signature timestamp.
+      Functionality is identical across versions.
+    </p>
+  </section>
+
+</main>
+
+<script>
+  const mallocByteBuffer = len => {
+    const ptr = Module._malloc(len)
+    return new Uint8Array(Module.HEAPU8.buffer, ptr, len)
+  }
+
+  const keygen = (username, licenseType, outputPointer) =>
+    Module.ccall('_Z6keygenPKcS0_Pc', null, ['string', 'string', 'number'],
+    [username, licenseType, outputPointer]);
+
+  const strToDataUrl = (str) => {
+    const te = new TextEncoder();
+    const b64Str = btoa(String.fromCharCode(...te.encode(str)));
+    return 'data:text/plain;charset=utf-8;base64,' + b64Str;
+  }
+
+  const generateKey = function () {
+    document.getElementById('output').textContent = '';
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.onclick = null;
+    saveBtn.hidden = true;
+
+    const username = document.getElementById('username').value;
+    const licenseType = document.getElementById('licenseType').value;
+
+    const outBuffer = mallocByteBuffer(600);
+    keygen(username, licenseType, outBuffer.byteOffset);
+
+    const output = Array.from(outBuffer)
+      .map(v => String.fromCharCode(v))
+      .join('')
+      .replace(/\0.*/g, '');
+
+    document.getElementById('output').textContent = output;
+
+    saveBtn.hidden = false;
+    saveBtn.onclick = () => {
+      const aTag = document.createElement('a');
+      aTag.download = 'rarreg.key';
+      aTag.target = '_blank';
+      aTag.href = strToDataUrl(output);
+      aTag.click();
+    };
+  }
+
+  document.getElementById('genBtn').onclick = generateKey;
+</script>
+
+<script>
+  ;(function () {
+    const wrrList = [
+      {label: '6.24 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20231013/wrr/winrar-x64-624sc.exe'},
+      {label: '6.24 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20231013/wrr/winrar-x32-624sc.exe'},
+      {label: '6.23 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230808/wrr/winrar-x64-623sc.exe'},
+      {label: '6.23 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230808/wrr/winrar-x32-623sc.exe'},
+      {label: '6.22 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230607/wrr/winrar-x64-622sc.exe'},
+      {label: '6.22 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230607/wrr/winrar-x32-622sc.exe'},
+      {label: '6.21 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230223/wrr/winrar-x64-621sc.exe'},
+      {label: '6.21 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230223/wrr/winrar-x32-621sc.exe'},
+      {label: '5.91 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20200708/wrr/winrar-x64-591sc.exe'},
+      {label: '5.91 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20200708/wrr/wrar591sc.exe'},
+    ];
+
+    const rrlbList = [
+      {label: '6.24 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20231013/rrlb/winrar-x64-624sc.exe'},
+      {label: '6.24 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20231013/rrlb/winrar-x32-624sc.exe'},
+      {label: '6.23 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230808/rrlb/winrar-x64-623sc.exe'},
+      {label: '6.23 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230808/rrlb/winrar-x32-623sc.exe'},
+      {label: '6.22 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230607/rrlb/winrar-x64-622sc.exe'},
+      {label: '6.22 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230607/rrlb/winrar-x32-622sc.exe'},
+      {label: '6.21 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230223/rrlb/winrar-x64-621sc.exe'},
+      {label: '6.21 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20230223/rrlb/winrar-x32-621sc.exe'},
+      {label: '5.91 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20200708/rrlb/winrar-x64-591sc.exe'},
+      {label: '5.91 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/sc/sc20200708/rrlb/wrar591sc.exe'},
+    ];
+
+    const homeList = [
+      {label: '6.24 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-624sc.exe'},
+      {label: '6.24 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-624sc.exe'},
+      {label: '6.23 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-623sc.exe'},
+      {label: '6.23 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-623sc.exe'},
+      {label: '6.22 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-622sc.exe'},
+      {label: '6.22 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-622sc.exe'},
+      {label: '6.21 x64', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-621sc.exe'},
+      {label: '6.21 x32', link: 'https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x32-621sc.exe'},
+    ];
+
+    function renderList(pel, list) {
+      if (!pel || !list) return;
+      const fragment = document.createDocumentFragment();
+      list.forEach(i => {
+        if (!i.link) return;
+        const li = document.createElement('li');
+        li.innerHTML = `<code>${i.label}</code>: <a target="_blank" rel="noopener" href="${i.link}">${i.link}</a>`;
+        fragment.appendChild(li);
+      })
+      pel.appendChild(fragment);
+    }
+
+    renderList(document.getElementById('wrrUl'), wrrList);
+    renderList(document.getElementById('rrlbUl'), rrlbList);
+    renderList(document.getElementById('homeUl'), homeList);
+  })();
+</script>
+
+</body>
+</html>
