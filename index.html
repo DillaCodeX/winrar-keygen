@@ -44,8 +44,8 @@
       </label>
     </div>
 
-    <button id="genBtn" class="primary-btn">Generate Key</button>
 
+<button id="genBtn" class="primary-btn" disabled>Loading Key Generator...</button>
     <textarea id="output" readonly rows="12"
               placeholder="Generated rarreg.key content will appear here..."></textarea>
 
@@ -98,14 +98,36 @@
 </main>
 
 <script>
+  let isWasmReady = false;
+  
+  // Wait for WASM to initialize
+  Module.onRuntimeInitialized = function() {
+    isWasmReady = true;
+    console.log('WASM module loaded and ready');
+    
+    // Enable the generate button
+    document.getElementById('genBtn').disabled = false;
+    document.getElementById('genBtn').textContent = 'Generate Key';
+  };
+
   const mallocByteBuffer = len => {
-    const ptr = Module._malloc(len)
-    return new Uint8Array(Module.HEAPU8.buffer, ptr, len)
+    if (!isWasmReady) {
+      alert('Please wait for the key generator to load...');
+      throw new Error('WASM not ready');
+    }
+    const ptr = Module._malloc(len);
+    return new Uint8Array(Module.HEAPU8.buffer, ptr, len);
   }
 
-  const keygen = (username, licenseType, outputPointer) =>
-    Module.ccall('_Z6keygenPKcS0_Pc', null, ['string', 'string', 'number'],
-    [username, licenseType, outputPointer]);
+  const keygen = (username, licenseType, outputPointer) => {
+    if (!isWasmReady) {
+      alert('Please wait for the key generator to load...');
+      return;
+    }
+    return Module.ccall('_Z6keygenPKcS0_Pc', null, 
+      ['string', 'string', 'number'],
+      [username, licenseType, outputPointer]);
+  };
 
   const strToDataUrl = (str) => {
     const te = new TextEncoder();
@@ -114,37 +136,52 @@
   }
 
   const generateKey = function () {
-    document.getElementById('output').textContent = '';
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.onclick = null;
-    saveBtn.hidden = true;
+    if (!isWasmReady) {
+      alert('Key generator is still loading. Please wait a moment...');
+      return;
+    }
+    
+    try {
+      document.getElementById('output').textContent = '';
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.onclick = null;
+      saveBtn.hidden = true;
 
-    const username = document.getElementById('username').value;
-    const licenseType = document.getElementById('licenseType').value;
+      const username = document.getElementById('username').value;
+      const licenseType = document.getElementById('licenseType').value;
 
-    const outBuffer = mallocByteBuffer(600);
-    keygen(username, licenseType, outBuffer.byteOffset);
+      const outBuffer = mallocByteBuffer(600);
+      keygen(username, licenseType, outBuffer.byteOffset);
 
-    const output = Array.from(outBuffer)
-      .map(v => String.fromCharCode(v))
-      .join('')
-      .replace(/\0.*/g, '');
+      const output = Array.from(outBuffer)
+        .map(v => String.fromCharCode(v))
+        .join('')
+        .replace(/\0.*/g, '');
 
-    document.getElementById('output').textContent = output;
+      document.getElementById('output').textContent = output;
 
-    saveBtn.hidden = false;
-    saveBtn.onclick = () => {
-      const aTag = document.createElement('a');
-      aTag.download = 'rarreg.key';
-      aTag.target = '_blank';
-      aTag.href = strToDataUrl(output);
-      aTag.click();
-    };
+      saveBtn.hidden = false;
+      saveBtn.onclick = () => {
+        const aTag = document.createElement('a');
+        aTag.download = 'rarreg.key';
+        aTag.target = '_blank';
+        aTag.href = strToDataUrl(output);
+        aTag.click();
+      };
+    } catch (error) {
+      console.error('Key generation error:', error);
+      alert('Error generating key: ' + error.message);
+    }
   }
 
-  document.getElementById('genBtn').onclick = generateKey;
+  // Initialize button - disable until WASM is ready
+  document.addEventListener('DOMContentLoaded', function() {
+    const genBtn = document.getElementById('genBtn');
+    genBtn.disabled = true;
+    genBtn.textContent = 'Loading Key Generator...';
+    genBtn.onclick = generateKey;
+  });
 </script>
-
 <script>
   ;(function () {
     const wrrList = [
